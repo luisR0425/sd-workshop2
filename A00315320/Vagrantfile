@@ -20,5 +20,25 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node2.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024","--cpus", "1", "--name", "centos_node2" ]
     end
+    node2.vm.provision "shell", inline: <<-SHELL
+    sudo yum update
+    sudo yum install wget -y
+    sudo yum install epel-release -y
+    cd ~
+    wget http://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+    sudo rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+    sudo yum install erlang -y
+    cd ~
+    wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.1/rabbitmq-server-3.6.1-1.noarch.rpm
+    sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+    sudo yum install rabbitmq-server-3.6.1-1.noarch.rpm -y
+    sudo systemctl start rabbitmq-server.service
+    sudo systemctl enable rabbitmq-server.service
+    rabbitmq-plugins enable rabbitmq_management
+    chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/
+    sudo rabbitmqctl add_user mqadmin mqadminpassword
+    sudo rabbitmqctl set_user_tags mqadmin administrator
+    sudo rabbitmqctl set_permissions -p / mqadmin ".*" ".*" ".*"
+    SHELL
   end
 end
