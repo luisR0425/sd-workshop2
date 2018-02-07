@@ -24,11 +24,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     sudo yum update
     sudo yum install wget -y
     sudo yum install epel-release -y
-    cd ~
     wget http://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
     sudo rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
     sudo yum install erlang -y
-    cd ~
     wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.1/rabbitmq-server-3.6.1-1.noarch.rpm
     sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
     sudo yum install rabbitmq-server-3.6.1-1.noarch.rpm -y
