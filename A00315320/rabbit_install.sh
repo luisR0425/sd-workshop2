@@ -8,6 +8,5 @@ chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/
 rabbitmqctl add_user test test
 rabbitmqctl set_user_tags test administrator
 rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
-sudo rabbitmq-server
-systemctl enable rabbitmq
-systemctl start rabbitmq
+sudo systemctl enable rabbitmq-server
+sudo systemctl start rabbitmq-server
