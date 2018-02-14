@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.ssh.insert_key = false
+  config.vm.define :centos_node1 do |node1|
+    node1.vm.box = "centos7-profe"
+    node1.vm.network :private_network, ip: "192.168.56.101"
+    node1.vm.network "public_network", bridge: "eno1", ip:"192.168.131.102", netmask: "255.255.255.0"
+    node1.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024","--cpus", "1", "--name", "centos_node1" ]
+    end
+  end
+  config.vm.define :centos_node2 do |node2|
+    node2.vm.box = "centos7-profe"
+    node2.vm.network :private_network, ip: "192.168.56.102"
+    node2.vm.network "public_network", bridge: "eno1", ip:"192.168.131.103", netmask: "255.255.255.0"
+    node2.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024","--cpus", "1", "--name", "centos_node2" ]
+    end
+    node2.vm.provision "shell", inline: <<-SHELL
+    sudo yum update
+    sudo yum install wget -y
+    sudo yum install epel-release -y
+    wget http://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+    sudo rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+    sudo yum install erlang -y
+    wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.1/rabbitmq-server-3.6.1-1.noarch.rpm
+    sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+    sudo yum install rabbitmq-server-3.6.1-1.noarch.rpm -y
+    sudo systemctl start rabbitmq-server.service
+    sudo systemctl enable rabbitmq-server.service
+    rabbitmq-plugins enable rabbitmq_management
+    chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/
+    sudo rabbitmqctl add_user mqadmin mqadminpassword
+    sudo rabbitmqctl set_user_tags mqadmin administrator
+    sudo rabbitmqctl set_permissions -p / mqadmin ".*" ".*" ".*"
+    SHELL
+  end
+end
